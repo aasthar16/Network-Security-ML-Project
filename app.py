@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 mongo_db_url = os.getenv("MONGODB_URL")
 print(mongo_db_url)
+
 import pymongo
 from Network_Security.exception.exception import NetworkSecurityException
 from Network_Security.logging.logger import logging
@@ -15,8 +16,9 @@ from Network_Security.pipeline.training_pipeline import TrainingPipeline
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile, Request
-from uvicorn import run as app_run
 from fastapi.responses import Response
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 import pandas as pd
 
@@ -44,15 +46,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from fastapi.templating import Jinja2Templates
-templates = Jinja2Templates(directory="templates")
-
-from fastapi.staticfiles import StaticFiles
+# Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Setup templates
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/", tags=["authentication"])
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "model_loaded": True}
 
 @app.get("/train")
 async def train_route():
@@ -80,4 +86,5 @@ async def predict_route(request: Request, file: UploadFile = File(...)):
         raise NetworkSecurityException(e, sys)
 
 if __name__ == "__main__":
-    app_run(app, host="0.0.0.0", port=7860)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7860)

@@ -1,30 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Network Security Prediction</title>
+    <title>Network Security System</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-
     <div class="container">
+        <h1>Network Intrusion Detection System</h1>
+        <p>Upload CSV file for prediction</p>
         
-         <h1>AI-Powered Network Intrusion Detection System</h1>
-            <p>
-            This application leverages machine learning to identify malicious network activity.
-            </p>
-            <br>
-
-            <p>Upload a dataset to perform batch predictions and uncover potential security risks in real time.</p>
-            
-
         <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" id="fileInput" name="file" required>
+            <input type="file" id="fileInput" name="file" accept=".csv" required>
             <button type="submit">Predict</button>
         </form>
-
+        
         <div id="result"></div>
     </div>
-
+    
     <script src="/static/script.js"></script>
 </body>
 </html>
