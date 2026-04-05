@@ -87,7 +87,7 @@ templates.env = Environment(
 
 @app.get("/")
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html",context= {"request": request})
 
 @app.get("/health")
 async def health_check():
