@@ -17,15 +17,17 @@ from Network_Security.pipeline.training_pipeline import TrainingPipeline
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile, Request
-from fastapi.responses import Response, HTMLResponse
-# from fastapi.templating import Jinja2Templates
+from fastapi.responses import Response
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import pandas as pd
 
 from Network_Security.utils.main_utils.utils import load_object
 from Network_Security.utils.ml_utils.model.estimator import NetworkModel
 
-
+# ============================================
+# DOWNLOAD MODEL FILES FROM GOOGLE DRIVE
+# ============================================
 def download_file(url, filename):
     os.makedirs("final_model", exist_ok=True)
     if not os.path.exists(filename):
@@ -42,13 +44,13 @@ def download_file(url, filename):
     else:
         print(f"✅ {filename} already exists")
 
-
-PREPROCESSOR_URL = "https://drive.google.com/uc?export=download&id=1hk46WG0BTicQvpe1oYfgDjoVvTFP7LQk"
-MODEL_URL = "https://drive.google.com/uc?export=download&id=17qBw0wk7tNx0sx4SpAyRrpd0hv44pEAD"
+# REPLACE THESE URLs WITH YOUR GOOGLE DRIVE DIRECT LINKS
+PREPROCESSOR_URL = "https://drive.google.com/uc?export=download&id=YOUR_PREPROCESSOR_FILE_ID"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=YOUR_MODEL_FILE_ID"
 
 download_file(PREPROCESSOR_URL, "final_model/preprocessor.pkl")
 download_file(MODEL_URL, "final_model/model.pkl")
-
+# ============================================
 
 os.makedirs("prediction_output", exist_ok=True)
 
@@ -71,23 +73,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
-from fastapi.templating import Jinja2Templates
-from jinja2 import Environment, FileSystemLoader
-
+# Setup templates
 templates = Jinja2Templates(directory="templates")
-templates.env = Environment(
-    loader=FileSystemLoader("templates"),
-    auto_reload=True,
-    cache_size=0
-)
 
 @app.get("/")
 async def index(request: Request):
-    return templates.TemplateResponse("index.html",context= {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
 async def health_check():
