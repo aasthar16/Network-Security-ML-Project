@@ -1,0 +1,10 @@
+mlflow.db 
+*.pkl 
+*.db 
+__pycache__/ 
+mlruns/ 
+venv/
+Artifacts/
+logs/
+.env
+Network_Data/

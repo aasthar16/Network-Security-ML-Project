@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  network-security-api:
+    build: .
+    container_name: network-security-app
+    ports:
+      - "7860:7860"
+    environment:
+      - MONGODB_URL=${MONGODB_URL}
+    restart: unless-stopped
