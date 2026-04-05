@@ -1,5 +1,6 @@
 import sys
 import os
+import requests
 
 import certifi
 ca = certifi.where()
@@ -17,10 +18,37 @@ from Network_Security.pipeline.training_pipeline import TrainingPipeline
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import Response, HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 import pandas as pd
 
 from Network_Security.utils.main_utils.utils import load_object
 from Network_Security.utils.ml_utils.model.estimator import NetworkModel
+
+
+def download_file(url, filename):
+    os.makedirs("final_model", exist_ok=True)
+    if not os.path.exists(filename):
+        print(f"Downloading {filename}...")
+        try:
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            with open(filename, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"✅ {filename} downloaded successfully!")
+        except Exception as e:
+            print(f"❌ Failed to download {filename}: {e}")
+    else:
+        print(f"✅ {filename} already exists")
+
+
+PREPROCESSOR_URL = "https://drive.google.com/uc?export=download&id=1hk46WG0BTicQvpe1oYfgDjoVvTFP7LQk"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=17qBw0wk7tNx0sx4SpAyRrpd0hv44pEAD"
+
+download_file(PREPROCESSOR_URL, "final_model/preprocessor.pkl")
+download_file(MODEL_URL, "final_model/model.pkl")
+
 
 os.makedirs("prediction_output", exist_ok=True)
 
@@ -43,50 +71,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-HTML_PAGE = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Network Security System</title>
-    <style>
-        body { font-family: Arial; margin: 40px; background: #0f172a; color: white; }
-        .container { max-width: 800px; margin: auto; background: #1e293b; padding: 40px; border-radius: 16px; }
-        input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; }
-        button { background: #3b82f6; color: white; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #334155; padding: 8px; text-align: left; }
-        th { background: #3b82f6; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Network Intrusion Detection System</h1>
-        <p>Upload CSV file for prediction</p>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" id="fileInput" name="file" accept=".csv" required>
-            <button type="submit">Predict</button>
-        </form>
-        <div id="result"></div>
-    </div>
-    <script>
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const file = document.getElementById('fileInput').files[0];
-            const formData = new FormData();
-            formData.append('file', file);
-            document.getElementById('result').innerHTML = '<p>Processing...</p>';
-            const response = await fetch('/predict', { method: 'POST', body: formData });
-            const html = await response.text();
-            document.getElementById('result').innerHTML = html;
-        });
-    </script>
-</body>
-</html>
-"""
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
-async def index():
-    return HTMLResponse(content=HTML_PAGE)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
 async def health_check():
@@ -113,7 +106,7 @@ async def predict_route(request: Request, file: UploadFile = File(...)):
         df['predicted_column'] = df['predicted_column'].replace(-1, 0)
         df.to_csv('prediction_output/output.csv')
         table_html = df.to_html(classes='table table-striped')
-        return HTMLResponse(content=table_html)
+        return templates.TemplateResponse("table.html", {"request": request, "table": table_html})
     except Exception as e:
         raise NetworkSecurityException(e, sys)
 
