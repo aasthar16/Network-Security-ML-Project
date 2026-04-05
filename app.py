@@ -18,7 +18,7 @@ from Network_Security.pipeline.training_pipeline import TrainingPipeline
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import Response, HTMLResponse
-from fastapi.templating import Jinja2Templates
+# from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import pandas as pd
 
@@ -75,7 +75,15 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
+from fastapi.templating import Jinja2Templates
+from jinja2 import Environment, FileSystemLoader
+
 templates = Jinja2Templates(directory="templates")
+templates.env = Environment(
+    loader=FileSystemLoader("templates"),
+    auto_reload=True,
+    cache_size=0
+)
 
 @app.get("/")
 async def index(request: Request):
