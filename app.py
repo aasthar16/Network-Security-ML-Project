@@ -45,8 +45,8 @@ def download_file(url, filename):
         print(f"✅ {filename} already exists")
 
 # REPLACE THESE URLs WITH YOUR GOOGLE DRIVE DIRECT LINKS
-PREPROCESSOR_URL = "https://drive.google.com/uc?export=download&id=YOUR_PREPROCESSOR_FILE_ID"
-MODEL_URL = "https://drive.google.com/uc?export=download&id=YOUR_MODEL_FILE_ID"
+PREPROCESSOR_URL = "https://drive.google.com/uc?export=download&id=1hk46WG0BTicQvpe1oYfgDjoVvTFP7LQk"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=17qBw0wk7tNx0sx4SpAyRrpd0hv44pEAD"
 
 download_file(PREPROCESSOR_URL, "final_model/preprocessor.pkl")
 download_file(MODEL_URL, "final_model/model.pkl")
