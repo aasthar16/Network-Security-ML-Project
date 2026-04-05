@@ -19,7 +19,7 @@ from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from starlette.responses import RedirectResponse
+import jinja2
 import pandas as pd
 
 from Network_Security.utils.main_utils.utils import load_object
@@ -49,8 +49,13 @@ app.add_middleware(
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Setup templates
+# Setup templates with caching DISABLED
 templates = Jinja2Templates(directory="templates")
+templates.env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader("templates"),
+    auto_reload=True,
+    cache_size=0
+)
 
 @app.get("/", tags=["authentication"])
 async def index(request: Request):
@@ -58,7 +63,7 @@ async def index(request: Request):
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "model_loaded": True}
+    return {"status": "healthy"}
 
 @app.get("/train")
 async def train_route():
