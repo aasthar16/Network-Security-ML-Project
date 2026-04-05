@@ -3,8 +3,8 @@ sdk: docker
 app_file: app.py
 title: Network Security System
 emoji: 🔒
-colorFrom: red
-colorTo: darkred
+colorFrom: indigo
+colorTo: indigo
 ---
 
 # Network Security System
