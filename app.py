@@ -77,12 +77,16 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Setup templates
+
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={}
+    )
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
@@ -108,7 +112,10 @@ async def predict_route(request: Request, file: UploadFile = File(...)):
         df['predicted_column'] = df['predicted_column'].replace(-1, 0)
         df.to_csv('prediction_output/output.csv')
         table_html = df.to_html(classes='table table-striped')
-        return templates.TemplateResponse("table.html", {"request": request, "table": table_html})
+        return templates.TemplateResponse(request=request,
+    name="table.html",
+    context={"table": table_html}
+    )
     except Exception as e:
         raise NetworkSecurityException(e, sys)
 
